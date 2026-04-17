@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CEF JS ↔ C++ 测试</title>
+</head>
+<body>
+    <h1>CEF 双向调用测试</h1>
+
+    <button onclick="testCallCpp()">点击调用 C++ 方法</button>
+    <button onclick="showMessage()">JS 弹窗测试</button>
+    <div id="result"></div>
+
+    <script>
+        // JS 调用 C++
+        function testCallCpp() {
+            try {
+                // 调用 C++ 注册的方法
+                var ret =  window.native.add(10, 20);
+                document.getElementById("result").innerHTML = 
+                    "C++ 返回结果：10+20 = " + ret;
+            } catch (e) {
+                document.getElementById("result").innerHTML = "错误：" + e.message;
+            }
+        }
+
+        // 普通JS方法
+        function showMessage() {
+            alert("这是纯JS弹窗");
+        }
+
+        // 提供给C++调用的JS方法
+        function showMsgFromCpp(msg) {
+            alert("C++ 调用 JS：" + msg);
+            document.getElementById("result").innerHTML = 
+                "C++ 调用了JS方法，消息：" + msg;
+        }
+		
+		function showMsgFromCppJson(jsonObj) {
+			alert("C++ 调用 JS\n姓名：" + jsonObj.name + "\n年龄：" + jsonObj.age);
+			
+			document.getElementById("result").innerHTML = 
+				"C++ 传入JSON：<br>" +
+				"姓名：" + jsonObj.name + "<br>" +
+				"年龄：" + jsonObj.age;
+		}
+    </script>
+</body>
+</html>
+

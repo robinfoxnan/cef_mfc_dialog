@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>微信风格聊天界面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #E5E5E5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 消息区域 */
+        #messageArea {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        /* 气泡 */
+        .bubble {
+            max-width: 70%;
+            margin-bottom: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        /* 左边（别人/C++） */
+        .left {
+            background: white;
+            align-self: flex-start;
+        }
+
+        /* 右边（自己） */
+        .right {
+            background: #9EEA6A;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        /* 底部输入栏 - 强制显示 */
+    .inputBox {
+        height: 52px;
+        background: #F5F5F5;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        border-top: 1px solid #ddd;
+        flex-shrink: 0; /* 关键：不让输入框被挤压消失 */
+    }
+
+        #inputText {
+            flex: 1;
+            height: 36px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        #sendBtn {
+            width: 65px;
+            height: 36px;
+            margin-left: 8px;
+            background: #07C160;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="messageArea"></div>
+
+    <div class="inputBox">
+        <input type="text" id="inputText" placeholder="输入消息...">
+        <button id="sendBtn">发送</button>
+    </div>
+
+    <script>
+        const area = document.getElementById('messageArea');
+        const input = document.getElementById('inputText');
+        const btn = document.getElementById('sendBtn');
+
+        // 添加一条消息
+        function addMsg(text, side) {
+            let div = document.createElement('div');
+            div.className = 'bubble ' + side;
+            div.innerText = text;
+            area.appendChild(div);
+            area.scrollTop = area.scrollHeight;
+        }
+
+        // 供C++调用
+        function showMsgFromCpp(msg) {
+            addMsg(msg, 'left');
+        }
+
+        // 发送
+        function send() {
+            let txt = input.value.trim();
+            if (!txt) return;
+            addMsg(txt, 'right');
+            input.value = '';
+
+            // 发给C++
+            try {
+                window.native.onSendMessage(txt);
+            } catch (e) {}
+        }
+
+        btn.onclick = send;
+        input.onkeydown = function (e) {
+            if (e.key === 'Enter') send();
+        };
+
+        // ==============================
+        // 初始化默认消息
+        // ==============================
+        addMsg('你好！', 'left');
+        addMsg('JS 和 C++ 互通已经完成', 'left');
+        addMsg('这个界面可以正常显示中文', 'left');
+        
+        addMsg('收到，界面运行正常', 'right');
+        addMsg('没有乱码，非常完美', 'right');
+
+    </script>
+</body>
+</html>

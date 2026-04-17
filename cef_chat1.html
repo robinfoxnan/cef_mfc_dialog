@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>仿微信聊天界面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: #EBEBEB;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 消息显示区域 */
+        #msgContainer {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #EBEBEB;
+        }
+
+        /* 消息气泡 */
+        .message {
+            max-width: 70%;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        /* 别人的消息（左侧） */
+        .msg-left {
+            background: white;
+            align-self: flex-start;
+        }
+
+        /* 我的消息（右侧） */
+        .msg-right {
+            background: #9EEA6A;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        /* 底部输入框区域 */
+        .input-area {
+            height: 50px;
+            background: #F5F5F5;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        #inputMsg {
+            flex: 1;
+            height: 36px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        #sendBtn {
+            width: 60px;
+            height: 36px;
+            margin-left: 8px;
+            background: #07C160;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #sendBtn:active {
+            background: #06B050;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 消息列表 -->
+    <div id="msgContainer"></div>
+
+    <!-- 底部输入框 -->
+    <div class="input-area">
+        <input type="text" id="inputMsg" placeholder="请输入消息...">
+        <button id="sendBtn">发送</button>
+    </div>
+
+    <script>
+        const msgContainer = document.getElementById('msgContainer');
+        const inputMsg = document.getElementById('inputMsg');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // 发送消息
+        function sendMessage() {
+            let text = inputMsg.value.trim();
+            if (!text) return;
+
+            // 显示到界面
+            addMessage(text, 'right');
+            inputMsg.value = '';
+
+            // 发送给 C++
+            try {
+                window.native.onSendMessage(text);
+            } catch (e) { }
+        }
+
+        // 添加消息到界面
+        function addMessage(text, side) {
+            let div = document.createElement('div');
+            div.className = 'message ' + (side === 'right' ? 'msg-right' : 'msg-left');
+            div.innerText = text;
+            msgContainer.appendChild(div);
+            // 滚动到底部
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
+
+        // 给 C++ 调用的方法：显示消息
+        function showMsgFromCpp(text) {
+            addMessage(text, 'left');
+        }
+
+        // 绑定事件
+        sendBtn.onclick = sendMessage;
+        inputMsg.onkeydown = (e) => {
+            if (e.key === 'Enter') sendMessage();
+        };
+
+        // 测试欢迎语
+        addMessage("欢迎使用仿微信聊天界面", "left");
+    </script>
+</body>
+</html>
